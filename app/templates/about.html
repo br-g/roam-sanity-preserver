@@ -1,0 +1,43 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <title>Roam Sanity Preserver</title>
+    <meta name="description" content="A search engine for everything related to Roam Research on the Web.">
+    <meta name="author" content="Bruno Godefroy">
+
+    <link rel='shortcut icon' type='image/x-icon' href="{{ url_for('static', filename='img/icon.ico') }}" />
+
+    <link rel="stylesheet" href="{{ url_for('static', filename='main.css') }}">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+    <link href="https://unpkg.com/material-components-web@latest/dist/material-components-web.min.css" rel="stylesheet">
+  </head>
+
+  <body>
+    <header>
+      <a id='logo' href='/'>Roam Sanity Preserver</a>
+    </header>
+
+    <div id='about_content'>
+      <p>
+        <b>Roam Sanity Preserver</b> is a simple search engine for everything related to <a href='https://roamresearch.com'>Roam&#160;Research</a> on the Web. The project is inspired by <a href='http://www.arxiv-sanity.com'>Arxiv&#160;Sanity&#160;Preserver</a>.
+      </p>
+      <p style="margin-bottom: 0px;">
+        The search index is updated every day with the latest content from:
+        <ul style="margin-top: 7px;">
+          <li>Slack</li>
+          <li>Twitter</li>
+          <li>some public Roam databases.</li>
+        </ul>
+      </p>
+      <p>
+        Only the English language is supported.
+      </p>
+      
+      <div id='social'>
+        <a href='https://twitter.com/brgodefroy' id='twitter'><img src="{{ url_for('static', filename='img/twitter.png') }}" alt="Twitter"></a>
+        <a href='https://github.com/br-g/roam-sanity-preserver' id='github'><img src="{{ url_for('static', filename='img/github.png') }}" alt="Github"></a>
+      </div>
+    </div>
+  </body>
+</html>

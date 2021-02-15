@@ -1,0 +1,207 @@
+@use '@material/floating-label/mdc-floating-label';
+@use '@material/line-ripple/mdc-line-ripple';
+@use '@material/notched-outline/mdc-notched-outline';
+@use '@material/textfield';
+
+@include textfield.core-styles;
+
+
+@font-face {
+    font-family: 'ColfaxAI';
+    src: url(fonts/ColfaxAIRegular.woff2) format('woff2'), url(fonts/ColfaxAIRegular.woff?v=2.0.0) format('woff');
+    font-weight: normal;
+    font-style: normal
+}
+
+@font-face {
+    font-family: 'ColfaxAI';
+    src: url(fonts/ColfaxAIRegularItalic.woff2?v=2.0.0) format('woff2'), url(fonts/ColfaxAIRegularItalic.woff?v=2.0.0) format('woff');
+    font-weight: normal;
+    font-style: italic
+}
+
+@font-face {
+    font-family: 'ColfaxAI';
+    src: url(fonts/ColfaxAIBold.woff2?v=2.0.0) format('woff2'), url(fonts/ColfaxAIBold.woff?v=2.0.0) format('woff');
+    font-weight: bold;
+    font-style: normal
+}
+
+@font-face {
+    font-family: 'ColfaxAI';
+    src: url(fonts/ColfaxAIBoldItalic.woff2?v=2.0.0) format('woff2'), url(fonts/ColfaxAIBoldItalic.woff?v=2.0.0) format('woff');
+    font-weight: bold;
+    font-style: italic
+}
+
+
+header {
+    font-family: ColfaxAI, Helvetica, sans-serif;
+}
+
+img, #social, .show_more, .show_less {
+    user-drag: none; 
+    user-select: none;
+    -moz-user-select: none;
+    -webkit-user-drag: none;
+    -webkit-user-select: none;
+    -ms-user-select: none;
+}
+
+#logo {
+    margin-top: 11px;
+    font-size: 25px;
+    color: #757D75;
+    margin-left: 16px;
+    display: inline-block;
+    text-decoration: none;
+}
+
+#about_link {
+    font-size: 15px;
+    color: #757d75b5;
+    margin-right: 16px;
+    text-align: right;
+    float: right;
+    margin-top: 11px;
+    text-decoration: none;
+}
+
+#about_link:hover {
+    text-decoration: underline;
+}
+
+#about_content {
+    clear: both;
+    position: relative;
+    width: 600px;
+    margin: auto;
+    margin-top: 15%;
+    margin-bottom: 15%;
+    font-family: ColfaxAI, Helvetica, sans-serif;
+    line-height: 22px;
+}
+
+#about_content p {
+    margin-bottom: 19px;
+}
+
+#center_col {
+    clear: both;
+    position: relative;
+    width: 600px;
+    margin: auto;
+    margin-top: 15%;
+    margin-bottom: 10%;
+}
+
+#search_bar {
+    font-size: 1.125rem;
+    width: 100%;
+    height: 50px;
+    margin-bottom: 40px;
+    --mdc-theme-primary: #757D75;
+}
+
+.search_result {
+    margin-bottom: 28px;
+    font-family: arial, sans-serif;
+}
+
+.search_result img {
+    height: 22px;
+    display: inline;
+    vertical-align: bottom;
+    margin-bottom: 2px;
+}
+
+.search_result .title {
+    font-size: 20px;
+    line-height: 1.3;
+    font-weight: normal;
+    margin-bottom: 3px;
+    display: inline;
+}
+
+.search_result .title.link_missing {
+    pointer-events: none;
+    cursor: default;
+    text-decoration: none;
+    color: #212121;
+}
+
+.search_result a {
+    color: #1a0dab;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.search_result a:hover {
+    text-decoration: underline;
+}
+
+.search_result a:visited {
+    color: #660099;
+}
+
+.search_result .content {
+    color: #4d5156;
+    line-height: 1.58;
+    text-align: left;
+    font-size: 14px;
+    font-weight: normal;
+    margin-top: 3px;
+}
+
+.search_result ul {
+    list-style-type: disc;
+    margin: 0;
+    padding-left: 18px;
+}
+
+.search_result .time {
+    color: #4d5156bf;
+    font-size: 12px;
+}
+
+.search_result .show_more, .search_result .show_less {
+    font-size: 14px;
+    line-height: 1.58;
+}
+
+.search_result .show_less {
+    display: none;
+}
+
+.search_result .content.long {
+    display: none;
+    max-height: 300px;
+    overflow: scroll;
+}
+
+.search_result .message_sep {
+    line-height: 0px;
+    margin-top: 4px;
+    margin-bottom: 5px;
+}
+
+#loading_spinner {
+    margin: auto;
+    width: 150px;
+    margin-top: 100px;
+    display: none;
+}
+
+#social {
+    text-align: center;
+    margin-top: 85px;
+}
+
+#social a {
+    margin-left: 14px;
+    margin-right: 14px;
+}
+
+#social img {
+    height: 50px;
+}
