@@ -52,8 +52,14 @@ def scrap_slack(slack_email: str, slack_password: str, mark_as_read: bool,
         driver.find_element_by_css_selector('input#email').send_keys(slack_email)
         driver.find_element_by_css_selector('input#password').send_keys(slack_password)
         time.sleep(1)
-        driver.find_element_by_css_selector('button#onetrust-accept-btn-handler').click()
-        time.sleep(1)
+
+        # Accept cookies (only in the EU)
+        try:
+            driver.find_element_by_css_selector('button#onetrust-accept-btn-handler').click()
+            time.sleep(1)
+        except NoSuchElementException:
+            pass
+
         driver.find_element_by_css_selector('button#signin_btn').click()
         time.sleep(5)
 
