@@ -95,7 +95,7 @@ def main():
 
         logger.info(f'Parsing `{db_id}`')
         parsed = list(parse_database(db_id, db))
-        logger.info(f'Collected {len(parsed)} blocks')
+        logger.info(f'Collected {len(parsed)} pages')
 
         logger.info(f'Saving `{db_id}`')
         for p in parsed:
