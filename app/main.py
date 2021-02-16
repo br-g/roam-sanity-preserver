@@ -5,7 +5,9 @@ from roam_sanity.indexing import index
 
 RESULTS_MAX = 1000
 RESULTS_BATCH_SIZE = 50
-N_CHARS_MAX = 200
+
+N_CHARS_DISPLAYED_MAX = 150
+N_CHARS_ADDED_MIN = 150
 
 app = Flask(__name__)
 
@@ -47,8 +49,8 @@ def format_result(raw: Dict) -> str:
         if 'url' not in raw:
             raw['url'] = ''
 
-    if len(content_short) > N_CHARS_MAX:
-        content_short = content_short[:N_CHARS_MAX-3] + '...'
+    if len(content_short) > N_CHARS_DISPLAYED_MAX + N_CHARS_ADDED_MIN:
+        content_short = content_short[:N_CHARS_DISPLAYED_MAX] + '...'
 
     time = dateutil.parser.parse(time_iso).strftime('%m/%d/%y')
 
