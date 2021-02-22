@@ -111,7 +111,7 @@ def format_twint_tweet(raw: Dict) -> Iterator[Dict]:
     # If retweet, consider the retweeted tweet instead
     if raw['retweet']:
         try:
-            yield from format_api_tweet(get_tweet(raw['id']).retweeted_status)
+            yield from format_api_tweet(get_tweet(raw['id']).retweeted_status)  # pylint: disable=no-member
         except twitter.error.TwitterError:  # If the tweet has been deleted
             pass
     else:

@@ -3,7 +3,7 @@ Scraps the Slack Web interface.
 Goes to the 'All unreads' section, opens threads one by one and saves their content.
 """
 
-from typing import Dict, List, Iterator, Callable
+from typing import Dict, Iterator, Callable, Optional, Any, Set
 import os
 import time
 import functools
@@ -19,7 +19,7 @@ from roam_sanity.util import save_as_json
 parsing_time = datetime.now().astimezone(pytz.utc).isoformat()
 
 
-def run_and_retry(fn: Callable, delay=1, n_try=5) -> bool:
+def run_and_retry(fn: Callable, delay=1, n_try=5) -> Any:
     for try_idx in range(n_try):
         if try_idx > 0:
             logger.warning(f'Retrying ({try_idx}/{n_try-1})...')
@@ -34,7 +34,7 @@ def run_and_retry(fn: Callable, delay=1, n_try=5) -> bool:
 
 
 def scrap_slack(slack_email: str, slack_password: str, mark_as_read: bool,
-                debug: bool) -> List[str]:
+                debug: bool) -> Iterator[str]:
     def get_driver():
         chrome_options = webdriver.ChromeOptions()
         if not debug:
@@ -96,7 +96,10 @@ def scrap_slack(slack_email: str, slack_password: str, mark_as_read: bool,
         time.sleep(0.5)
 
     def do_mark_as_read(driver):
-        driver.find_element_by_xpath("//button[text()='Mark All Messages Read']").click()
+        try:
+            driver.find_element_by_xpath("//button[text()='Mark All Messages Read']").click()
+        except NoSuchElementException:
+            logger.warning("Can't find button 'Mark All Messages Read'")
         time.sleep(1)
 
     def _fix_html(html):
@@ -109,7 +112,7 @@ def scrap_slack(slack_email: str, slack_password: str, mark_as_read: bool,
         action.move_to_element(message)
         action.perform()
         time.sleep(1)
-        driver.find_element_by_css_selector('button.c-message_actions__button:nth-of-type(5)').click()
+        driver.find_element_by_css_selector('i.c-icon--comment-alt').click()
 
     def _get_thread_html(driver):
         return driver.find_element_by_css_selector('.p-flexpane--iap1').get_attribute('outerHTML')
@@ -118,18 +121,33 @@ def scrap_slack(slack_email: str, slack_password: str, mark_as_read: bool,
         driver.find_element_by_css_selector('button.p-flexpane_header__control').click()
         time.sleep(1)
 
-    def open_and_save_threads(driver):
+    def _is_end(driver) -> bool:
+        """Returns whether the `Mark All Messages Read` is visible"""
+        try:
+            driver.find_element_by_xpath("//*[text()='Mark All Messages Read']")
+            return True
+        except:
+            return False
+
+    def open_and_save_threads(driver) -> Iterator[str]:
         logger.info('Opening and saving threads')
 
-        seen = set()
-        res = []
+        seen = set()  # type: Set[str]
         while True:
             messages = driver.find_elements_by_css_selector('div.c-message_kit__gutter__right')
 
             # If we have reached the end of messages, stop
-            if not messages or (seen and _fix_html(messages[-1].get_attribute('outerHTML')) in seen):
+            if not messages:
+                logger.warning("Can't find messages anymore")
                 time.sleep(1)
-                return res
+                return
+
+            if (seen and _fix_html(messages[-1].get_attribute('outerHTML')) in seen):
+                assert _is_end(driver), 'No more messages, but the ' \
+                                        '`Mark All Messages Read` sign is missing'
+                logger.info('Completed `All unreads` section')
+                time.sleep(1)
+                return
 
             for message in messages:
                 # We may have already seen this message
@@ -146,7 +164,7 @@ def scrap_slack(slack_email: str, slack_password: str, mark_as_read: bool,
                 time.sleep(0.5)
 
                 # Align message to the top and open thread
-                driver.execute_script("arguments[0].scrollIntoView();", message)
+                driver.execute_script('arguments[0].scrollIntoView();', message)
                 seen.add(_fix_html(message.get_attribute('outerHTML')))
                 time.sleep(1)
 
@@ -157,23 +175,30 @@ def scrap_slack(slack_email: str, slack_password: str, mark_as_read: bool,
                         functools.partial(_open_thread, driver, message)
                     )
                 except SystemError:
-                    logger.info("Can't open thread. Skipping.")
-                    continue
+                    logger.warning("Can't open thread. Skipping.")
 
                 try:
                     html = run_and_retry(
                         functools.partial(_get_thread_html, driver)
                     )
-                    res.append(html)
+                    yield html
                 except SystemError:
-                    logger.info("Can't get thread's HTML. Skipping.")
+                    logger.warning("Can't get thread's HTML. Skipping.")
                 finally:
                     time.sleep(0.5)
-
                     try:
                         _close_thread(driver)
                     except:
-                        logger.info("Can't close thread.")
+                        logger.warning("Can't close thread.")
+
+                # Remove messages when done with them
+                try:
+                    driver.execute_script('''
+                        var element = arguments[0];
+                        element.parentNode.removeChild(element);
+                        ''', message)
+                except:
+                    logger.warning("Can't remove message.")
 
                 break
 
@@ -182,13 +207,11 @@ def scrap_slack(slack_email: str, slack_password: str, mark_as_read: bool,
     open_slack(driver)
     sign_in(driver)
     open_all_unreads(driver)
-    res = open_and_save_threads(driver)
+    yield from open_and_save_threads(driver)
 
     if mark_as_read:
         do_mark_as_read(driver)
     driver.close()
-
-    return res
 
 
 def timestamp_to_iso(timestamp: float) -> str:
@@ -204,7 +227,7 @@ def clean_up_text(text: str) -> str:
     return text
 
 
-def parse_html_thread(html: str) -> Iterator[Dict]:
+def parse_html_thread(html: str) -> Optional[Dict]:
     soup = BeautifulSoup(html, 'html.parser')
     channel_name = soup.find('span', {'class': ['c-channel_entity__name']}).text
     messages = soup.find_all('div', {'class': ['c-message_kit__gutter']})
@@ -228,10 +251,10 @@ def parse_html_thread(html: str) -> Iterator[Dict]:
         })
 
     if not parsed:
-        return
+        return None
 
-    # Yield an aggregation of messages from the thread
-    yield {
+    # Return an aggregation of messages from the thread
+    return {
         'source': 'slack',
         'channel': channel_name,
         'parsing_time': parsing_time,
@@ -248,21 +271,10 @@ def parse_html_thread(html: str) -> Iterator[Dict]:
 @click.option('--mark_as_read', type=bool, default=False, nargs=1, show_default=True)
 @click.option('--debug', type=bool, default=True, nargs=1, show_default=True)
 def main(slack_email: str, slack_password: str, mark_as_read: bool, debug: bool):
-    # Scrap
-    html = scrap_slack(slack_email, slack_password, mark_as_read, debug)
-    logger.info(f'Retrieved {len(html)} threads')
-
-    # Parse HTML
-    logger.info('Parsing...')
-    parsed = []
-    for e in html:
-        parsed += list(parse_html_thread(e))
-
-    # Save
-    for p in parsed:
-        save_as_json(p)
-
-    logger.info('Saved threads as JSON')
+    for html in scrap_slack(slack_email, slack_password, mark_as_read, debug):
+        parsed = parse_html_thread(html)
+        if parsed:
+            save_as_json(parsed)
 
 
 if __name__ == '__main__':
