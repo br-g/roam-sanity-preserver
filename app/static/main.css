@@ -39,6 +39,12 @@ header {
     font-family: ColfaxAI, Helvetica, sans-serif;
 }
 
+h1 {
+    font-weight: normal;
+    margin-block-start: 0em;
+    margin-block-end: 0em;
+}
+
 img, #social, .show_more, .show_less {
     user-drag: none; 
     user-select: none;
