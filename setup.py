@@ -34,6 +34,7 @@ setup(
             'pytz',
             'selenium',
             'twint @ git+https://git@github.com/twintproject/twint.git@origin/master#egg=twint',
+            'webdriver-manager',
         ]
     },
     classifiers=(

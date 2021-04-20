@@ -14,6 +14,7 @@ from loguru import logger
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
+from webdriver_manager.chrome import ChromeDriverManager  # pylint: disable=unused-import
 from roam_sanity.util import save_as_json
 
 parsing_time = datetime.now().astimezone(pytz.utc).isoformat()
@@ -40,6 +41,9 @@ def scrap_slack(slack_email: str, slack_password: str, mark_as_read: bool,
         if not debug:
             chrome_options.add_argument('--headless')
             chrome_options.add_argument('--no-sandbox')
+        #return webdriver.Chrome(
+        #    ChromeDriverManager(version='90.0.4430.24').install(),
+        #    options=chrome_options)
         return webdriver.Chrome(options=chrome_options)
 
     def open_slack(driver):
@@ -272,7 +276,12 @@ def parse_html_thread(html: str) -> Optional[Dict]:
 @click.option('--debug', type=bool, default=True, nargs=1, show_default=True)
 def main(slack_email: str, slack_password: str, mark_as_read: bool, debug: bool):
     for html in scrap_slack(slack_email, slack_password, mark_as_read, debug):
-        parsed = parse_html_thread(html)
+        try:
+            parsed = parse_html_thread(html)
+        except:
+            logger.warning("Can't parse message.")
+            continue
+
         if parsed:
             save_as_json(parsed)
 
