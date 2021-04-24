@@ -14,7 +14,7 @@ from loguru import logger
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.common.exceptions import NoSuchElementException
-from webdriver_manager.chrome import ChromeDriverManager  # pylint: disable=unused-import
+from webdriver_manager.chrome import ChromeDriverManager
 from roam_sanity.util import save_as_json
 
 parsing_time = datetime.now().astimezone(pytz.utc).isoformat()
@@ -41,10 +41,9 @@ def scrap_slack(slack_email: str, slack_password: str, mark_as_read: bool,
         if not debug:
             chrome_options.add_argument('--headless')
             chrome_options.add_argument('--no-sandbox')
-        #return webdriver.Chrome(
-        #    ChromeDriverManager(version='90.0.4430.24').install(),
-        #    options=chrome_options)
-        return webdriver.Chrome(options=chrome_options)
+        return webdriver.Chrome(
+            ChromeDriverManager(version='90.0.4430.24').install(),
+            options=chrome_options)
 
     def open_slack(driver):
         logger.info('Opening Slack')
