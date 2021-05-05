@@ -32,7 +32,7 @@ def get_by_extension(path: Path, extension: str) -> Iterator[Path]:
 
 
 def run_in_subprocess(cmd: str) -> str:
-    pop = Popen(cmd, shell=True, stdin=PIPE, stderr=PIPE, stdout=PIPE,
+    pop = Popen(cmd, shell=True, stdin=PIPE, stderr=PIPE, stdout=PIPE,  # pylint: disable=consider-using-with
                 close_fds=True)
     pop.wait()
     if pop.returncode != 0:
