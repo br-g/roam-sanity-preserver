@@ -78,6 +78,16 @@ def scrap_slack(slack_email: str, slack_password: str, mark_as_read: bool,
             pass
         time.sleep(5)
 
+        # Close "Learn more" message
+        try:
+            run_and_retry(
+                driver.find_element_by_css_selector('button.c-button-unstyled.c-icon_button.c-icon_button--light.c-icon_button--size_medium.c-coachmark__close').click
+            )
+        except NoSuchElementException:
+            pass
+
+        time.sleep(3)
+
     def open_all_unreads(driver):
         logger.info("Opening 'All reads' section")
 
@@ -94,7 +104,7 @@ def scrap_slack(slack_email: str, slack_password: str, mark_as_read: bool,
         time.sleep(3)
 
         # Remove header, so we can see messages' top lines
-        header = driver.find_element_by_css_selector('div.p-ia__view_header')
+        header = driver.find_element_by_css_selector('div.p-view_header')
         driver.execute_script("arguments[0].style.display = 'none';", header)
         time.sleep(0.5)
 
